@@ -49,11 +49,14 @@ RUN mkdir -p /app/data /app/data/backups && chmod -R 777 /app/data
 
 # Copia toda a aplicação já compilada com dependências intactas
 COPY --from=builder /app ./
+COPY entrypoint.sh ./
+RUN chmod +x entrypoint.sh
 
 # Declaração do volume persistente (crítico para Coolify reter dados do SQLite)
 VOLUME ["/app/data"]
 
 EXPOSE 3000
 
-# Inicializa o SaaS Validation Lab diretamente com Node e suporte unificado a SQLite
-CMD ["node", "--experimental-sqlite", "server/dist/index.js"]
+# Inicializa o SaaS Validation Lab
+ENTRYPOINT ["/bin/sh", "entrypoint.sh"]
+
