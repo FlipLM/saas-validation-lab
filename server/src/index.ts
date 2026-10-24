@@ -1,3 +1,10 @@
+process.on('uncaughtException', (err) => {
+  console.error('[FATAL UNCAUGHT EXCEPTION]', err);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[FATAL UNHANDLED REJECTION]', reason);
+});
+
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';

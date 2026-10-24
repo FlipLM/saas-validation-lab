@@ -45,7 +45,7 @@ ENV HOST=0.0.0.0
 ENV DATABASE_URL=/app/data/saas_validator.db
 
 # Cria diretório com permissões para o volume persistente do SQLite
-RUN mkdir -p /app/data /app/data/backups
+RUN mkdir -p /app/data /app/data/backups && chmod -R 777 /app/data
 
 # Copia toda a aplicação já compilada com dependências intactas
 COPY --from=builder /app ./
@@ -55,5 +55,5 @@ VOLUME ["/app/data"]
 
 EXPOSE 3000
 
-# Inicializa o SaaS Validation Lab diretamente com Node
-CMD ["node", "server/dist/index.js"]
+# Inicializa o SaaS Validation Lab diretamente com Node e suporte unificado a SQLite
+CMD ["node", "--experimental-sqlite", "server/dist/index.js"]
