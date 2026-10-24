@@ -1,0 +1,40 @@
+services:
+  saas-validator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: saas-validation-lab:latest
+    container_name: saas-validation-lab
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+      - DATABASE_URL=/app/data/saas_validator.db
+      - JWT_SECRET=${JWT_SECRET:-saas-validator-jwt-super-secret-key-32-chars-min}
+      - WORKER_CONCURRENCY=${WORKER_CONCURRENCY:-2}
+      - WORKER_POLL_INTERVAL_MS=${WORKER_POLL_INTERVAL_MS:-3000}
+      - ORCHESTRATOR_ENABLED=${ORCHESTRATOR_ENABLED:-true}
+      - ORCHESTRATOR_INTERVAL_MS=${ORCHESTRATOR_INTERVAL_MS:-10000}
+      - GLOBAL_AUTOMATION_PAUSED=${GLOBAL_AUTOMATION_PAUSED:-false}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
+      - TELEGRAM_NOTIFICATIONS_ENABLED=${TELEGRAM_NOTIFICATIONS_ENABLED:-false}
+      - PENTAGI_API_URL=${PENTAGI_API_URL:-http://localhost:8080}
+      - PENTAGI_API_KEY=${PENTAGI_API_KEY:-}
+      - PENTAGI_ENABLED=${PENTAGI_ENABLED:-false}
+    volumes:
+      - saas_data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  saas_data:
+    name: saas_validator_data
+    driver: local

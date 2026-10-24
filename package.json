@@ -1,0 +1,31 @@
+{
+  "name": "saas-validation-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Plataforma autônoma de auditoria, validação, segurança e evolução de SaaS",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=server",
+    "dev:server": "npm run dev --workspace=server",
+    "dev:client": "npm run dev --workspace=client",
+    "build": "npm run build --workspaces",
+    "start": "npm run start --workspace=server",
+    "test": "npm run test --workspace=server",
+    "db:migrate": "npm run db:migrate --workspace=server",
+    "db:seed": "npm run db:seed --workspace=server",
+    "db:backup": "npm run db:backup --workspace=server"
+  },
+  "keywords": [
+    "saas",
+    "audit",
+    "security",
+    "autonomous-orchestrator",
+    "pentagi",
+    "telegram"
+  ],
+  "author": "SaaS Validation Lab Team",
+  "license": "MIT"
+}
