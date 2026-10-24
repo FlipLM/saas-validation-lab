@@ -2,6 +2,7 @@
   "name": "saas-validation-lab",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "Plataforma autônoma de auditoria, validação, segurança e evolução de SaaS",
   "workspaces": [
     "server",
