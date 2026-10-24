@@ -29,15 +29,12 @@ COPY client/ ./client/
 # Compila o backend (tsc) e frontend SPA (Vite)
 RUN npm run build
 
-# Limpa devDependencies mantendo apenas dependências de produção
-RUN npm prune --production
-
 # ------------------------------------------------------------------------------
 # Estágio 2: Imagem final de execução de produção
 # ------------------------------------------------------------------------------
 FROM node:22-alpine AS runner
 
-# Instala curl para o Healthcheck do Docker e Coolify
+# Instala curl para diagnósticos
 RUN apk add --no-cache curl
 
 WORKDIR /app
@@ -50,13 +47,8 @@ ENV DATABASE_URL=/app/data/saas_validator.db
 # Cria diretório com permissões para o volume persistente do SQLite
 RUN mkdir -p /app/data /app/data/backups
 
-# Copia os manifestos e dependências prunadas
-COPY package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/server/package*.json ./server/
-COPY --from=builder /app/server/dist ./server/dist
-COPY --from=builder /app/client/package*.json ./client/
-COPY --from=builder /app/client/dist ./client/dist
+# Copia toda a aplicação já compilada com dependências intactas
+COPY --from=builder /app ./
 
 # Declaração do volume persistente (crítico para Coolify reter dados do SQLite)
 VOLUME ["/app/data"]
