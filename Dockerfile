@@ -10,6 +10,11 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
+# Instala ferramentas de compilação globais para disponibilidade em todos os workspaces
+RUN npm install -g typescript vite
+
+ENV PATH=/app/node_modules/.bin:$PATH
+
 # Copia manifestos de dependências para cache de camadas
 COPY package*.json ./
 COPY server/package*.json ./server/
