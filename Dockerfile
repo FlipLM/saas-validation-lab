@@ -10,9 +10,8 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Instala ferramentas de compilação globais para disponibilidade em todos os workspaces
-RUN npm install -g typescript vite
-
+# Garante que dependências de desenvolvimento (tsc, vite, tipos) sejam instaladas
+ENV NODE_ENV=development
 ENV PATH=/app/node_modules/.bin:$PATH
 
 # Copia manifestos de dependências para cache de camadas
@@ -20,8 +19,8 @@ COPY package*.json ./
 COPY server/package*.json ./server/
 COPY client/package*.json ./client/
 
-# Instala todas as dependências (incluindo devDependencies necessárias para compilação)
-RUN npm install
+# Instala todas as dependências (incluindo devDependencies)
+RUN npm install --include=dev
 
 # Copia código-fonte completo
 COPY server/ ./server/
