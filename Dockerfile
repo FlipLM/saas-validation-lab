@@ -63,9 +63,5 @@ VOLUME ["/app/data"]
 
 EXPOSE 3000
 
-# Verificação contínua de saúde do contêiner
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD curl -f http://localhost:3000/api || exit 1
-
-# Inicializa o SaaS Validation Lab
-CMD ["npm", "run", "start"]
+# Inicializa o SaaS Validation Lab diretamente com Node
+CMD ["node", "server/dist/index.js"]
