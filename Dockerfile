@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 # Estágio 1: Build da aplicação (Client SPA + Server TypeScript)
 # ------------------------------------------------------------------------------
-FROM node:22-alpine AS builder
+FROM node:22-slim AS builder
 
 WORKDIR /app
 
@@ -30,12 +30,12 @@ COPY client/ ./client/
 RUN npm run build
 
 # ------------------------------------------------------------------------------
-# Estágio 2: Imagem final de execução de produção
+# Estágio 2: Imagem final de execução de produção (Debian glibc)
 # ------------------------------------------------------------------------------
-FROM node:22-alpine AS runner
+FROM node:22-slim AS runner
 
 # Instala curl para diagnósticos
-RUN apk add --no-cache curl
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
