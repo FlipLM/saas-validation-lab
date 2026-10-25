@@ -317,6 +317,7 @@ export function runSeeds(): void {
 }
 
 // Executa diretamente se invocado via CLI
-if (process.argv[1]?.endsWith('index.ts') || process.argv[1]?.endsWith('index.js')) {
+if (process.argv[1]?.endsWith('seeds/index.ts') || process.argv[1]?.endsWith('seeds/index.js')) {
   runSeeds();
 }
+
