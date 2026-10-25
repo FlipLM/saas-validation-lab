@@ -19,7 +19,7 @@ export class ApprovalService {
       sql += ' WHERE a.status = ?';
       params.push(status);
     }
-    sql += ' ORDER BY CASE a.status WHEN "PENDING" THEN 1 ELSE 2 END, a.created_at DESC';
+    sql += " ORDER BY CASE a.status WHEN 'PENDING' THEN 1 ELSE 2 END, a.created_at DESC";
     return queryAll<Approval & { task_title?: string; risk_level?: string; project_name?: string }>(sql, params);
   }
 
