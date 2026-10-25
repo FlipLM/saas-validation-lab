@@ -123,7 +123,7 @@ export class OrchestratorControlService {
             category: 'SECURITY',
             priority: 'HIGH',
             severity: 'HIGH',
-            assigned_agent: 'Web Recon Agent',
+            assigned_agent: 'Hermes Agent',
             acceptance_criteria: 'Headers HSTS e CSP validados com nota A no scanner de segurança HTTP.',
             dedup_key: `remediation_headers_${projectId}`,
           },
@@ -133,7 +133,7 @@ export class OrchestratorControlService {
             category: 'LEGAL',
             priority: 'HIGH',
             severity: 'HIGH',
-            assigned_agent: 'Legal Research Analyst',
+            assigned_agent: 'Hermes Agent',
             acceptance_criteria: 'Toda consulta e alteração em prontuário gera log auditável persistente.',
             dedup_key: `remediation_audit_trail_${projectId}`,
           },
@@ -143,7 +143,7 @@ export class OrchestratorControlService {
             category: 'LEGAL',
             priority: 'MEDIUM',
             severity: 'MEDIUM',
-            assigned_agent: 'Legal Research Analyst',
+            assigned_agent: 'Hermes Agent',
             acceptance_criteria: 'Prontuários nunca sofrem hard-delete físico antes de 20 anos.',
             dedup_key: `remediation_retention_20y_${projectId}`,
           },
@@ -153,7 +153,7 @@ export class OrchestratorControlService {
             category: 'QA',
             priority: 'HIGH',
             severity: 'HIGH',
-            assigned_agent: 'QA, Security & Reliability Agent',
+            assigned_agent: 'Hermes Agent',
             acceptance_criteria: 'Tentativas excedentes recebem HTTP 429 Too Many Requests com Retry-After.',
             dedup_key: `remediation_rate_limit_${projectId}`,
           },
@@ -201,7 +201,7 @@ export class OrchestratorControlService {
 
         return {
           success: true,
-          message: `🛠️ ${createdCount} tarefas de correção e remediação foram inseridas na fila TODO. O Orquestrador já está delegando para os agentes autônomos!`,
+          message: `🛠️ ${createdCount} tarefas de correção e remediação foram inseridas na fila TODO. O Agente Hermes já assumiu a execução autônoma via OpenRouter (Gemma 4 31B)!`,
         };
       }
 

@@ -12,11 +12,15 @@ import {
   LegalPrivacyComplianceAuditorAgent,
   ProductValidationReleaseReadinessAgent,
 } from './implementations/specialized-agents.js';
+import { HermesAgent } from './implementations/hermes.agent.js';
 import { execute, transaction } from '../db/index.js';
 import crypto from 'node:crypto';
 
 export class AgentRunner {
   private static agentsRegistry: Record<string, IAgent> = {
+    'Hermes Agent': new HermesAgent(),
+    'Agente Hermes': new HermesAgent(),
+    'hermes-agent': new HermesAgent(),
     'Web Recon Agent': new WebReconAgent(),
     'Legal Research Analyst': new LegalResearchAgent(),
     'Product Discovery Agent': new ProductDiscoveryAgent(),
