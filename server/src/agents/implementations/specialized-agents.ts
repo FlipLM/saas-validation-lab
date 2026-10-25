@@ -33,7 +33,7 @@ export class ProductDiscoveryAgent implements IAgent {
           confidence: 'CONFIRMED',
           recommendation: 'Criar modelos pré-configurados de anamnese por especialidade (Traumato-Ortopedia, Neurofuncional, Respiratória e RPG).',
           evidence: {
-            type: 'BENCHMARK',
+            type: 'DOM_SNAPSHOT',
             source_url: ctx.target_url,
             raw_content: `Fluxo de Atendimento Clínico:\n1. Triagem e Agendamento\n2. Avaliação Inicial (Anamnese + Amplitude de Movimento + Escala EVA)\n3. Fichas de Evolução Diária\n4. Alta Fisioterapêutica e Relatório Médico`,
           },
@@ -172,7 +172,7 @@ export class CompetitiveIntelligenceAgent implements IAgent {
           confidence: 'CONFIRMED',
           recommendation: 'Construir página de comparação "FisioteraHub vs ZenFisio" destacando agilidade no preenchimento de evolução e suporte humanizado.',
           evidence: {
-            type: 'COMPETITIVE_ANALYSIS',
+            type: 'LOG_OUTPUT',
             source_url: 'https://zenfisio.com.br',
             raw_content: `MATRIZ DE CONCORRÊNCIA (Fisioterapia no Brasil):\n` +
               `1. ZenFisio: Market share ~35%, R$ 139+/mês, interface pesada.\n` +
@@ -189,7 +189,7 @@ export class CompetitiveIntelligenceAgent implements IAgent {
           confidence: 'CONFIRMED',
           recommendation: 'Destacar nas campanhas o benefício: "Preencha a evolução do seu paciente em menos de 2 minutos e saia do consultório sem pendências".',
           evidence: {
-            type: 'COMPETITIVE_ANALYSIS',
+            type: 'LOG_OUTPUT',
             source_url: 'https://fisioterahub.com',
             raw_content: `Pontos de Dor dos Fisioterapeutas com Softwares Atuais:\n` +
               `- "Lento para carregar a ficha entre um paciente e outro"\n` +
@@ -225,7 +225,7 @@ export class MarketGrowthAgent implements IAgent {
           confidence: 'CONFIRMED',
           recommendation: 'Iniciar tração com foco em capitais do Sudeste e Sul (SP, MG, RJ, PR, RS), onde se concentra 62% dos consultórios privados do país.',
           evidence: {
-            type: 'MARKET_ANALYSIS',
+            type: 'LOG_OUTPUT',
             source_url: 'https://coffito.gov.br',
             raw_content: `DADOS OFICIAIS DE MERCADO:\n` +
               `Total de Fisioterapeutas no Brasil: >320.000 profissionais.\n` +
@@ -242,7 +242,7 @@ export class MarketGrowthAgent implements IAgent {
           confidence: 'CONFIRMED',
           recommendation: 'Oferecer migração assistida gratuita de dados do sistema antigo (importação de cadastros) para eliminar o principal atrito de mudança.',
           evidence: {
-            type: 'MARKET_ANALYSIS',
+            type: 'LOG_OUTPUT',
             source_url: ctx.target_url,
             raw_content: `MÉTRICAS UNITÁRIAS SAAS:\n` +
               `- Ticket Médio Recomendado: R$ 99,00 a R$ 149,00/mês\n` +
