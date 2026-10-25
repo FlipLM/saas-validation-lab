@@ -19,6 +19,7 @@ export interface OpenRouterGenerateOptions {
 export interface OpenRouterGenerateResult {
   success: boolean;
   content: string;
+  reasoning?: string;
   modelUsed?: string;
   escalatedToAntigravity: boolean;
   escalationReason?: string;
@@ -148,12 +149,15 @@ export class OpenRouterAdapter {
 
         const data = (await response.json().catch(() => ({}))) as any;
 
-        if (response.ok && data?.choices?.[0]?.message?.content) {
-          const content = data.choices[0].message.content.trim();
+        const choice = data?.choices?.[0];
+        if (response.ok && (choice?.message?.content || choice?.message?.reasoning)) {
+          const content = choice.message.content?.trim() || '';
+          const reasoning = choice.message.reasoning?.trim() || (choice.message.reasoning_details ? JSON.stringify(choice.message.reasoning_details) : undefined);
           console.log(`[OPENROUTER] Sucesso com modelo "${model}". Tokens usados: ${data.usage?.total_tokens || 0}`);
           return {
             success: true,
             content,
+            reasoning,
             modelUsed: model,
             escalatedToAntigravity: false,
           };

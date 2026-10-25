@@ -45,6 +45,7 @@ Gere o diagnóstico, o patch de código cirúrgico e a complexidade técnica.`;
         taskId: ctx.task_id,
         projectId: ctx.project_id,
         taskTitle: ctx.task_title,
+        agentId: this.name,
       });
 
       if (llmResult.modelUsed) {

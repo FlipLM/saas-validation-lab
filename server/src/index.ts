@@ -33,6 +33,7 @@ import { executionsRouter } from './routes/executions.routes.js';
 import { approvalsRouter } from './routes/approvals.routes.js';
 import { diagnosticsRouter } from './routes/diagnostics.routes.js';
 import { orchestratorRouter } from './routes/orchestrator.routes.js';
+import { agentActivitiesRouter } from './routes/agent-activities.routes.js';
 import { TelegramBotService } from './integrations/telegram/telegram-bot.service.js';
 
 // Assegura migrações e seeds na inicialização do servidor
@@ -79,6 +80,7 @@ app.use('/api/executions', executionsRouter);
 app.use('/api/approvals', approvalsRouter);
 app.use('/api/diagnostics', diagnosticsRouter);
 app.use('/api/orchestrator', orchestratorRouter);
+app.use('/api/agents', agentActivitiesRouter);
 
 // Rota Raiz Informativa
 app.get('/api', (_req: Request, res: Response) => {

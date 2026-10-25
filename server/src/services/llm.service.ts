@@ -3,6 +3,8 @@ import { OpenRouterAdapter, LLMSpecialty, OpenRouterGenerateOptions } from '../i
 import { TelegramAdapter } from '../integrations/telegram/telegram-adapter.js';
 import crypto from 'node:crypto';
 
+import { AgentActivityService } from './agent-activity.service.js';
+
 export class LLMService {
   private static getOpenRouterClient(): OpenRouterAdapter {
     let apiKey = process.env.OPENROUTER_API_KEY || '';
@@ -26,22 +28,77 @@ export class LLMService {
 
   static async generate(
     prompt: string,
-    options: OpenRouterGenerateOptions & { taskId?: string; projectId?: string; taskTitle?: string } = {}
+    options: OpenRouterGenerateOptions & { 
+      taskId?: string; 
+      projectId?: string; 
+      taskTitle?: string;
+      agentId?: string;
+      executionId?: string;
+    } = {}
   ): Promise<{
     content: string;
+    reasoning?: string;
     modelUsed?: string;
     escalatedToAntigravity: boolean;
     escalationReason?: string;
   }> {
+    if (options.projectId) {
+      AgentActivityService.recordActivity({
+        projectId: options.projectId,
+        executionId: options.executionId,
+        taskId: options.taskId,
+        agentId: options.agentId || 'Hermes Agent',
+        stage: 'THINKING',
+        thought: `[Planejamento Inicial]: Avaliando a tarefa "${options.taskTitle || 'Execução Especializada'}". Definindo parâmetros e contexto técnico do SaaS FisioteraHub.`,
+        modelUsed: 'Orquestrador / LLM Gateway'
+      });
+    }
+
     const client = this.getOpenRouterClient();
     const result = await client.generate(prompt, options);
 
+    if (options.projectId && result.reasoning) {
+      AgentActivityService.recordActivity({
+        projectId: options.projectId,
+        executionId: options.executionId,
+        taskId: options.taskId,
+        agentId: options.agentId || 'Hermes Agent',
+        stage: 'THINKING',
+        thought: result.reasoning,
+        modelUsed: result.modelUsed
+      });
+    }
+
+    if (options.projectId && result.content) {
+      AgentActivityService.recordActivity({
+        projectId: options.projectId,
+        executionId: options.executionId,
+        taskId: options.taskId,
+        agentId: options.agentId || 'Hermes Agent',
+        stage: 'PRODUCING',
+        outputProduced: result.content,
+        modelUsed: result.modelUsed
+      });
+    }
+
     if (result.escalatedToAntigravity && options.taskId) {
+      if (options.projectId) {
+        AgentActivityService.recordActivity({
+          projectId: options.projectId,
+          executionId: options.executionId,
+          taskId: options.taskId,
+          agentId: options.agentId || 'Hermes Agent',
+          stage: 'ESCALATED',
+          thought: `Escalação para o Antigravity (IDE Local): ${result.escalationReason}`,
+          modelUsed: result.modelUsed
+        });
+      }
       await this.escalateTaskToAntigravity(options.taskId, options.projectId, options.taskTitle, result.escalationReason);
     }
 
     return {
       content: result.content,
+      reasoning: result.reasoning,
       modelUsed: result.modelUsed,
       escalatedToAntigravity: result.escalatedToAntigravity,
       escalationReason: result.escalationReason,

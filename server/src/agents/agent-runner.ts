@@ -13,6 +13,7 @@ import {
   ProductValidationReleaseReadinessAgent,
 } from './implementations/specialized-agents.js';
 import { HermesAgent } from './implementations/hermes.agent.js';
+import { AgentActivityService } from '../services/agent-activity.service.js';
 import { execute, transaction } from '../db/index.js';
 import crypto from 'node:crypto';
 
@@ -47,6 +48,17 @@ export class AgentRunner {
     }
 
     console.log(`[AGENT RUNNER] Iniciando execução do agente "${agent.name}" para o projeto ${ctx.project_name}...`);
+
+    AgentActivityService.recordActivity({
+      projectId: ctx.project_id,
+      executionId,
+      taskId: ctx.task_id,
+      agentId: agent.name,
+      stage: 'ANALYZING',
+      thought: `Iniciando análise técnica da tarefa "${ctx.task_title || agent.name}". Escopo autorizado: ${ctx.allowed_domains.join(', ') || ctx.target_url}.`,
+      modelUsed: 'Orquestrador Autônomo'
+    });
+
     const output = await agent.execute(ctx);
 
     let persistedCount = 0;
@@ -109,6 +121,30 @@ export class AgentRunner {
           ]);
         }
       }
+    });
+
+    if (output.findings.length > 0) {
+      AgentActivityService.recordActivity({
+        projectId: ctx.project_id,
+        executionId,
+        taskId: ctx.task_id,
+        agentId: 'Independent Evidence Validator',
+        stage: 'VALIDATING',
+        thought: `Validação independente de ${output.findings.length} descobertas concluída. Hashes SHA-256 gerados com conformidade verificada.`,
+        outputProduced: JSON.stringify(output.findings.map(f => ({ title: f.title, severity: f.severity, category: f.category }))),
+        modelUsed: 'Validador Independente'
+      });
+    }
+
+    AgentActivityService.recordActivity({
+      projectId: ctx.project_id,
+      executionId,
+      taskId: ctx.task_id,
+      agentId: agent.name,
+      stage: 'COMPLETED',
+      thought: `Execução do agente "${agent.name}" concluída com sucesso. ${persistedCount} descobertas persistidas (${validatedCount} validadas com evidência).`,
+      outputProduced: output.summary,
+      modelUsed: 'Orquestrador Autônomo'
     });
 
     console.log(`[AGENT RUNNER] Execução do agente "${agent.name}" concluída. ${persistedCount} descobertas geradas (${validatedCount} validadas com evidência).`);

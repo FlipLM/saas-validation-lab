@@ -201,12 +201,28 @@ export function runMigrations(): void {
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
+    -- 15. Feed de Atividades, Pensamento e Produção em Tempo Real dos Agentes
+    CREATE TABLE IF NOT EXISTS agent_activities (
+      id TEXT PRIMARY KEY,
+      project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+      execution_id TEXT REFERENCES execution_jobs(id) ON DELETE CASCADE,
+      task_id TEXT REFERENCES tasks(id) ON DELETE SET NULL,
+      agent_id TEXT NOT NULL,
+      stage TEXT NOT NULL DEFAULT 'THINKING',
+      thought TEXT,
+      output_produced TEXT,
+      model_used TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
     -- Índices para Performance e Integridade
     CREATE INDEX IF NOT EXISTS idx_tasks_project ON tasks(project_id, column);
     CREATE INDEX IF NOT EXISTS idx_tasks_dedup ON tasks(dedup_key);
     CREATE INDEX IF NOT EXISTS idx_jobs_status ON execution_jobs(status, created_at);
     CREATE INDEX IF NOT EXISTS idx_findings_project ON findings(project_id, severity);
     CREATE INDEX IF NOT EXISTS idx_evidence_finding ON evidence(finding_id);
+    CREATE INDEX IF NOT EXISTS idx_agent_activities_created ON agent_activities(created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_agent_activities_agent ON agent_activities(agent_id, created_at DESC);
   `);
 
   try {

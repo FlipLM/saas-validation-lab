@@ -158,3 +158,26 @@ export interface DashboardStats {
   pending_approvals: number;
   recent_tasks: any[];
 }
+
+export type AgentStage = 
+  | 'THINKING' 
+  | 'ANALYZING' 
+  | 'PRODUCING' 
+  | 'VALIDATING' 
+  | 'COMPLETED' 
+  | 'ESCALATED';
+
+export interface AgentActivity {
+  id: string;
+  project_id: string;
+  execution_id?: string;
+  task_id?: string;
+  agent_id: string;
+  stage: AgentStage;
+  thought?: string;
+  output_produced?: string;
+  model_used?: string;
+  created_at: string;
+  project_name?: string;
+  task_title?: string;
+}

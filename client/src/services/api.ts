@@ -117,4 +117,15 @@ export const api = {
   },
   executeOrchestratorDecision: (action: string, projectId?: string) =>
     request<any>('/orchestrator/decision', { method: 'POST', body: JSON.stringify({ action, projectId }) }),
+
+  // Atividades e Pensamento em Tempo Real dos Agentes
+  listAgentActivities: (filters?: { projectId?: string; agentId?: string; stage?: string; limit?: number; since?: string }) => {
+    const params = new URLSearchParams();
+    if (filters?.projectId) params.append('projectId', filters.projectId);
+    if (filters?.agentId) params.append('agentId', filters.agentId);
+    if (filters?.stage) params.append('stage', filters.stage);
+    if (filters?.limit) params.append('limit', String(filters.limit));
+    if (filters?.since) params.append('since', filters.since);
+    return request<any[]>(`/agents/activities?${params.toString()}`);
+  },
 };

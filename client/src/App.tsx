@@ -10,6 +10,7 @@ import { Reports } from './pages/Reports.js';
 import { Executions } from './pages/Executions.js';
 import { Approvals } from './pages/Approvals.js';
 import { Diagnostics } from './pages/Diagnostics.js';
+import { LiveAgentStream } from './pages/LiveAgentStream.js';
 import { api } from './services/api.js';
 
 export const App: React.FC = () => {
@@ -79,6 +80,7 @@ export const App: React.FC = () => {
           {activeTab === 'dashboard' && <Dashboard onNavigate={setActiveTab} />}
           {activeTab === 'projects' && <Projects />}
           {activeTab === 'kanban' && <Kanban />}
+          {activeTab === 'live-agents' && <LiveAgentStream />}
           {activeTab === 'checklist' && <Checklist />}
           {activeTab === 'integrations' && <Integrations />}
           {activeTab === 'reports' && <Reports />}

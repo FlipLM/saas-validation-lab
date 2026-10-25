@@ -11,7 +11,8 @@ import {
   ArrowRight,
   ShieldCheck,
   Cpu,
-  Clock
+  Clock,
+  Radio
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -79,6 +80,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => onNavigate('live-agents')}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-emerald-500/15 border border-emerald-500/30 hover:bg-emerald-500/25 text-emerald-300 text-sm font-semibold transition"
+          >
+            <Radio className="w-4 h-4 text-emerald-400 animate-pulse" />
+            <span>Raciocínio ao Vivo</span>
+          </button>
           <button
             onClick={() => onNavigate('projects')}
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold shadow-lg shadow-brand-500/20 transition"

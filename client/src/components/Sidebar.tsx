@@ -8,7 +8,8 @@ import {
   FileText, 
   PlayCircle, 
   ShieldCheck, 
-  Activity,
+  Radio,
+  Brain,
   ShieldAlert,
   Terminal
 } from 'lucide-react';
@@ -17,6 +18,7 @@ export type ActiveTab =
   | 'dashboard'
   | 'projects'
   | 'kanban'
+  | 'live-agents'
   | 'checklist'
   | 'integrations'
   | 'reports'
@@ -41,6 +43,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'dashboard', label: 'Dashboard Geral', icon: LayoutDashboard },
     { id: 'projects', label: 'Projetos SaaS', icon: Layers },
     { id: 'kanban', label: 'Kanban Inteligente', icon: Kanban },
+    { 
+      id: 'live-agents', 
+      label: 'Raciocínio & Produção ao Vivo', 
+      icon: Brain,
+      badge: 'LIVE',
+      badgeColor: 'bg-emerald-500 text-slate-950 font-bold animate-pulse'
+    },
     { id: 'checklist', label: 'Checklist de Implantação', icon: CheckSquare },
     { id: 'integrations', label: 'Central de Integrações', icon: Cpu },
     { id: 'reports', label: 'Central de Relatórios', icon: FileText },

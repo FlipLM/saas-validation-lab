@@ -434,6 +434,63 @@ export function runSeeds(): void {
     }
   }
 
+  // 6. Atividades Iniciais para Demonstração de Telemetria em Tempo Real
+  try {
+    const existingActivities = db.prepare('SELECT COUNT(*) as count FROM agent_activities').get() as { count: number };
+    const targetProj = (db.prepare('SELECT id FROM projects WHERE id = ?').get('4b182dd0-ddaf-4917-ac06-976224d32e60') as { id: string } | undefined)
+      || (db.prepare('SELECT id FROM projects LIMIT 1').get() as { id: string } | undefined);
+
+    if (targetProj && (!existingActivities || existingActivities.count === 0)) {
+      const demoActivities = [
+        {
+          id: crypto.randomUUID(),
+          project_id: targetProj.id,
+          agent_id: 'Hermes Agent',
+          stage: 'THINKING',
+          thought: 'Analisando diretivas de segurança HTTP no backend Express do SaaS FisioteraHub. Ausência de cabeçalhos HSTS (Strict-Transport-Security) e CSP expõe a aplicação a ataques de MitM e Clickjacking.',
+          output_produced: null,
+          model_used: 'cohere/north-mini-code:free',
+        },
+        {
+          id: crypto.randomUUID(),
+          project_id: targetProj.id,
+          agent_id: 'Hermes Agent',
+          stage: 'PRODUCING',
+          thought: 'Gerando patch modular de middleware com Helmet, configurando max-age=31536000 e CSP permissivo para recursos locais.',
+          output_produced: `import helmet from 'helmet';\n\napp.use(helmet({\n  contentSecurityPolicy: {\n    directives: {\n      defaultSrc: ["'self'"],\n      scriptSrc: ["'self'", "'unsafe-inline'"],\n      styleSrc: ["'self'", "'unsafe-inline'"],\n      imgSrc: ["'self'", 'data:', 'https:'],\n    },\n  },\n  hsts: {\n    maxAge: 31536000,\n    includeSubDomains: true,\n    preload: true,\n  },\n}));`,
+          model_used: 'cohere/north-mini-code:free',
+        },
+        {
+          id: crypto.randomUUID(),
+          project_id: targetProj.id,
+          agent_id: 'Hermes Agent',
+          stage: 'PRODUCING',
+          thought: 'Estruturando trilha de auditoria clínica conforme Art. 11 da LGPD para dados sensíveis de saúde em prontuários fisioterapêuticos.',
+          output_produced: `export async function logClinicalAudit(req: Request, recordId: string, action: 'READ' | 'WRITE' | 'DELETE') {\n  await prisma.clinicalAuditLog.create({\n    data: {\n      userId: req.user.id,\n      recordId,\n      action,\n      ipAddress: req.ip,\n      userAgent: req.headers['user-agent'],\n      timestamp: new Date(),\n    },\n  });\n}`,
+          model_used: 'cohere/north-mini-code:free',
+        },
+        {
+          id: crypto.randomUUID(),
+          project_id: targetProj.id,
+          agent_id: 'Independent Evidence Validator',
+          stage: 'VALIDATING',
+          thought: 'Validação independente de 4 descobertas de remediação. Gerando hashes SHA-256 e conferindo critérios de aceitação do Kanban.',
+          output_produced: '{"status":"VALIDATED","confidence":"HIGH","sha256":"9a7b2e1f4c3d8e5b6a7c9f0e1d2c3b4a5f6e7d8c"}',
+          model_used: 'Validador Independente',
+        }
+      ];
+
+      for (const a of demoActivities) {
+        db.prepare(`
+          INSERT INTO agent_activities (id, project_id, agent_id, stage, thought, output_produced, model_used)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `).run(a.id, a.project_id, a.agent_id, a.stage, a.thought, a.output_produced, a.model_used);
+      }
+    }
+  } catch (err) {
+    console.warn('[DB] Aviso ao inserir seeds de atividades:', err);
+  }
+
   console.log('[DB] Seeds inseridos com sucesso.');
 }
 
