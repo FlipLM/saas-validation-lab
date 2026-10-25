@@ -62,7 +62,7 @@ export class ExecutionService {
 
     execute(`
       INSERT INTO execution_jobs (id, project_id, task_id, agent_id, status, payload, max_retries)
-      VALUES (?, ?, ?, ?, ?, 3)
+      VALUES (?, ?, ?, ?, ?, ?, 3)
     `, [id, data.project_id, data.task_id || null, data.agent_id, initialStatus, payloadJson]);
 
     return this.getJobById(id);
