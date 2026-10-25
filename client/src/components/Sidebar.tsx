@@ -8,7 +8,7 @@ import {
   FileText, 
   PlayCircle, 
   ShieldCheck, 
-  Radio,
+  Activity,
   Brain,
   ShieldAlert,
   Terminal

@@ -13,11 +13,9 @@ import {
   Copy, 
   Check, 
   Filter, 
-  Sparkles, 
   Bot, 
   Terminal, 
-  Layers,
-  ArrowUpRight
+  Layers
 } from 'lucide-react';
 
 export const LiveAgentStream: React.FC = () => {
@@ -195,7 +193,7 @@ export const LiveAgentStream: React.FC = () => {
             </h2>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span>LIVE SSE STREAM</span>
+              <span>LIVE SSE STREAM{eventCount > 0 ? ` (${eventCount} eventos)` : ''}</span>
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
