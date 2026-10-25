@@ -140,10 +140,12 @@ export interface Integration {
   name: string;
   status: IntegrationStatus;
   config_masked: string; // JSON com valores mascarados
+  config_secure?: string; // JSON com valores reais protegidos no backend
   last_test_at?: string;
   last_error?: string;
   updated_at: string;
 }
+
 
 export interface Report {
   id: string;

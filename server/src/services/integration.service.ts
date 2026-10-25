@@ -60,8 +60,35 @@ export class IntegrationService {
       throw new Error('Integração não encontrada');
     }
 
-    // Mascara campos sensíveis antes de persistir
-    const masked: Record<string, any> = { ...newConfig };
+    let secureConfig: Record<string, any> = {};
+    try {
+      secureConfig = JSON.parse(existing.config_secure || '{}');
+    } catch {
+      secureConfig = {};
+    }
+
+    // Atualiza segredos caso o usuário tenha digitado um valor novo (não mascarado)
+    for (const [key, value] of Object.entries(newConfig)) {
+      if (value !== undefined && value !== null) {
+        const strVal = String(value).trim();
+        // Se não for um valor mascarado com '****', persiste o valor real
+        if (!strVal.includes('****')) {
+          secureConfig[key] = strVal;
+        }
+      }
+    }
+
+    // Sincroniza com variáveis de ambiente do processo em tempo de execução
+    if (id === 'telegram') {
+      if (secureConfig.bot_token) process.env.TELEGRAM_BOT_TOKEN = secureConfig.bot_token;
+      if (secureConfig.chat_id) process.env.TELEGRAM_CHAT_ID = secureConfig.chat_id;
+    } else if (id === 'pentagi') {
+      if (secureConfig.api_url) process.env.PENTAGI_API_URL = secureConfig.api_url;
+      if (secureConfig.api_key) process.env.PENTAGI_API_KEY = secureConfig.api_key;
+    }
+
+    // Gera configuração mascarada para exibição segura na API e frontend
+    const masked: Record<string, any> = { ...secureConfig };
     if (masked.api_key && masked.api_key !== 'NOT_SET') {
       masked.api_key = this.maskSecret(masked.api_key);
     }
@@ -72,9 +99,9 @@ export class IntegrationService {
     const status: IntegrationStatus = 'CONFIGURED';
     execute(`
       UPDATE integrations 
-      SET config_masked = ?, status = ?, updated_at = CURRENT_TIMESTAMP 
+      SET config_masked = ?, config_secure = ?, status = ?, updated_at = CURRENT_TIMESTAMP 
       WHERE id = ?
-    `, [JSON.stringify(masked), status, id]);
+    `, [JSON.stringify(masked), JSON.stringify(secureConfig), status, id]);
 
     return this.listIntegrations().find(i => i.id === id);
   }
@@ -85,6 +112,13 @@ export class IntegrationService {
       throw new Error('Integração não encontrada');
     }
 
+    let secureConfig: Record<string, any> = {};
+    try {
+      secureConfig = JSON.parse(existing.config_secure || '{}');
+    } catch {
+      secureConfig = {};
+    }
+
     // Registra status intermediário TESTING
     execute(`UPDATE integrations SET status = 'TESTING' WHERE id = ?`, [id]);
 
@@ -93,8 +127,8 @@ export class IntegrationService {
     };
 
     if (id === 'pentagi') {
-      const apiUrl = process.env.PENTAGI_API_URL || 'http://localhost:8080';
-      const apiKey = process.env.PENTAGI_API_KEY || '';
+      const apiUrl = secureConfig.api_url || process.env.PENTAGI_API_URL || 'http://localhost:8080';
+      const apiKey = secureConfig.api_key || process.env.PENTAGI_API_KEY || '';
       const adapter = new PentAGIAdapter(apiUrl, apiKey);
       const res = await adapter.testConnection();
       testResult = {
@@ -103,8 +137,8 @@ export class IntegrationService {
         responseTimeMs: res.responseTimeMs,
       };
     } else if (id === 'telegram') {
-      const token = process.env.TELEGRAM_BOT_TOKEN || '';
-      const chatId = process.env.TELEGRAM_CHAT_ID || '';
+      const token = secureConfig.bot_token || process.env.TELEGRAM_BOT_TOKEN || '';
+      const chatId = secureConfig.chat_id || process.env.TELEGRAM_CHAT_ID || '';
       const adapter = new TelegramAdapter(token, chatId);
       const res = await adapter.testConnection();
       testResult = {
@@ -113,6 +147,7 @@ export class IntegrationService {
         responseTimeMs: res.responseTimeMs,
       };
     }
+
 
     // Persiste resultado oficial
     execute(`

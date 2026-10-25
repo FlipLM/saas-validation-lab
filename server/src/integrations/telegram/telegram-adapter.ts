@@ -31,13 +31,20 @@ export class TelegramAdapter {
       const data = (await response.json().catch(() => ({}))) as any;
 
       if (response.ok && data.ok) {
+        let warning: string | undefined;
+        if (this.chatId && (this.chatId.toLowerCase().endsWith('bot') || !/^-?\d+$/.test(this.chatId))) {
+          warning = `Bot autenticado (@${data.result?.username}), mas o Chat ID informado ("${this.chatId}") parece ser o nome do bot. O Chat ID receptor deve ser o seu ID numérico (ex: 123456789). Obtenha enviando /start para @userinfobot no Telegram.`;
+        }
+
         return {
           isAvailable: true,
           status: 'TESTED',
           botUsername: data.result?.username,
           responseTimeMs,
+          error: warning,
         };
-      } else {
+      }
+ else {
         return {
           isAvailable: false,
           status: 'FAILED',

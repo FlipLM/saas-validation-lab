@@ -151,10 +151,12 @@ export function runMigrations(): void {
       name TEXT NOT NULL,
       status TEXT NOT NULL DEFAULT 'NOT_CONFIGURED',
       config_masked TEXT NOT NULL DEFAULT '{}',
+      config_secure TEXT NOT NULL DEFAULT '{}',
       last_test_at DATETIME,
       last_error TEXT,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
 
     -- 12. Histórico de Testes de Integração
     CREATE TABLE IF NOT EXISTS integration_test_runs (
@@ -205,11 +207,17 @@ export function runMigrations(): void {
     CREATE INDEX IF NOT EXISTS idx_jobs_status ON execution_jobs(status, created_at);
     CREATE INDEX IF NOT EXISTS idx_findings_project ON findings(project_id, severity);
     CREATE INDEX IF NOT EXISTS idx_evidence_finding ON evidence(finding_id);
-    CREATE INDEX IF NOT EXISTS idx_reports_project ON reports(project_id, created_at);
   `);
+
+  try {
+    db.exec("ALTER TABLE integrations ADD COLUMN config_secure TEXT NOT NULL DEFAULT '{}'");
+  } catch {
+    // Coluna já existe
+  }
 
   console.log('[DB] Migrações concluídas com sucesso.');
 }
+
 
 // Executa diretamente se invocado via CLI
 if (process.argv[1]?.endsWith('migrations.ts') || process.argv[1]?.endsWith('migrations.js')) {
