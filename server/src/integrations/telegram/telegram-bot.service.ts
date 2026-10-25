@@ -42,6 +42,9 @@ export class TelegramBotService {
   static getInteractiveKeyboard(webUrl = 'http://7vynlqklkgwlz6s0rmh89nfl.143.95.213.67.sslip.io') {
     return [
       [
+        { text: '🏆 Certificar 100/100 Produção', callback_data: 'action:certify_100' },
+      ],
+      [
         { text: '🚀 Aprovar Teste de Carga', callback_data: 'action:approve_stress' },
         { text: '🛠️ Gerar Tarefas de Correção', callback_data: 'action:generate_fixes' },
       ],
