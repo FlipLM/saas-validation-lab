@@ -34,13 +34,13 @@ Gere o diagnóstico, o patch de código cirúrgico e a complexidade técnica.`;
     let codePatch = '// Nenhuma alteração de código necessária.';
     let complexity: 'LOW' | 'MEDIUM' | 'HIGH' = 'MEDIUM';
     let recommendation = 'Aplicar revisão por pares antes do deploy.';
-    let modelUsed = 'google/gemma-4-31b-it:free';
+    let modelUsed = 'cohere/north-mini-code:free';
 
     try {
       const llmResult = await LLMService.generate(userPrompt, {
         specialty: 'coding',
         systemPrompt,
-        maxTokens: 800,
+        maxTokens: 1200,
         temperature: 0.1,
         taskId: ctx.task_id,
         projectId: ctx.project_id,

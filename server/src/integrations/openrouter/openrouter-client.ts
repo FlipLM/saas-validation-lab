@@ -39,10 +39,9 @@ export class OpenRouterAdapter {
   // Modelos gratuitos por especialidade
   private static modelHierarchy: Record<LLMSpecialty, string[]> = {
     coding: [
-      'openrouter/free',
       'cohere/north-mini-code:free',
+      'openrouter/free',
       'google/gemma-4-31b-it:free',
-      'qwen/qwen-2.5-coder-32b-instruct:free',
     ],
     reasoning: [
       'openrouter/free',
