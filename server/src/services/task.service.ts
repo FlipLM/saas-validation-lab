@@ -55,7 +55,7 @@ export class TaskService {
       params.push(filters.priority);
     }
 
-    sql += ' ORDER BY CASE t.priority WHEN "CRITICAL" THEN 1 WHEN "HIGH" THEN 2 WHEN "MEDIUM" THEN 3 ELSE 4 END, t.created_at DESC';
+    sql += " ORDER BY CASE t.priority WHEN 'CRITICAL' THEN 1 WHEN 'HIGH' THEN 2 WHEN 'MEDIUM' THEN 3 ELSE 4 END, t.created_at DESC";
 
     return queryAll<Task>(sql, params);
   }
