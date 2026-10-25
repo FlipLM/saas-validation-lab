@@ -30,8 +30,9 @@ export class IndependentEvidenceValidator {
       };
     }
 
-    // Regra 2: Verificação de Alvo e Escopo
-    if (ev.source_url) {
+    // Regra 2: Verificação de Alvo e Escopo (apenas para requisições do próprio alvo)
+    const isExternalResearchType = ['LEGAL_ARTICLE', 'BENCHMARK', 'MARKET_ANALYSIS', 'COMPETITIVE_ANALYSIS', 'LOG_OUTPUT'].includes(ev.type);
+    if (ev.source_url && !isExternalResearchType) {
       try {
         const urlObj = new URL(ev.source_url);
         const inScope = context.allowed_domains.some(domain => 
@@ -76,7 +77,12 @@ export class IndependentEvidenceValidator {
     const hasReproducibleMarker = 
       ev.type === 'HTTP_REQUEST_RESPONSE' || 
       ev.type === 'CODE_SNIPPET' || 
-      ev.type === 'LEGAL_ARTICLE';
+      ev.type === 'LEGAL_ARTICLE' ||
+      ev.type === 'DOM_SNAPSHOT' ||
+      ev.type === 'BENCHMARK' ||
+      ev.type === 'MARKET_ANALYSIS' ||
+      ev.type === 'COMPETITIVE_ANALYSIS' ||
+      ev.type === 'LOG_OUTPUT';
 
     if (hasReproducibleMarker && finding.confidence !== 'UNVERIFIED') {
       return {

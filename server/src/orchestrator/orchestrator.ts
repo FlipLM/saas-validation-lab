@@ -69,8 +69,8 @@ export class Orchestrator {
           SELECT 1 FROM execution_jobs ej 
           WHERE ej.task_id = t.id AND ej.status IN ('QUEUED', 'RUNNING', 'WAITING_APPROVAL')
         )
-      ORDER BY CASE t.priority WHEN 'CRITICAL' THEN 1 WHEN 'HIGH' THEN 2 WHEN 'MEDIUM' THEN 3 ELSE 4 END
-      LIMIT 5
+      ORDER BY CASE t.priority WHEN 'CRITICAL' THEN 1 WHEN 'HIGH' THEN 2 WHEN 'MEDIUM' THEN 3 ELSE 4 END, t.created_at ASC
+      LIMIT 50
     `);
 
     for (const task of eligibleTasks) {

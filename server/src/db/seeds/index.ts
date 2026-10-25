@@ -313,6 +313,121 @@ export function runSeeds(): void {
     }
   }
 
+  // 5. Assegura conjunto completo de tarefas especializadas para todos os projetos
+  const allProjects = db.prepare('SELECT id, name FROM projects').all() as Array<{ id: string; name: string }>;
+  const specializedTasksDefinitions = [
+    {
+      title: 'Mapeamento Profundo de Concorrentes (ZenFisio, FisioWorks, ConecteFisio)',
+      description: 'Competitive Intelligence Agent deve investigar os principais concorrentes no Brasil, matriz de funcionalidades, precificação e pontos de dor dos clientes.',
+      column: 'TODO',
+      category: 'GROWTH',
+      priority: 'HIGH',
+      risk_level: 'LOW',
+      requires_approval: 0,
+      assigned_agent: 'Competitive Intelligence Agent',
+      acceptance_criteria: JSON.stringify(['Matriz de concorrentes consolidada', 'Diferenciais de mercado mapeados']),
+      dedup_suffix: 'competitor-001'
+    },
+    {
+      title: 'Estudo de Mercado e Dimensionamento TAM/SAM/SOM para Fisioterapia',
+      description: 'Market & Growth Agent deve analisar o tamanho de mercado de consultórios e clínicas de fisioterapia no Brasil, CAC, LTV e canais de tração.',
+      column: 'TODO',
+      category: 'GROWTH',
+      priority: 'HIGH',
+      risk_level: 'LOW',
+      requires_approval: 0,
+      assigned_agent: 'Market & Growth Agent',
+      acceptance_criteria: JSON.stringify(['TAM/SAM/SOM mapeado', 'Estratégia de CAC e LTV definida']),
+      dedup_suffix: 'market-001'
+    },
+    {
+      title: 'Mapeamento de Personas e Validação de Proposta de Valor',
+      description: 'Product Discovery Agent deve delimitar as personas de fisioterapeutas autônomos e gestores de clínica e mapear a jornada de retenção.',
+      column: 'TODO',
+      category: 'PRODUCT',
+      priority: 'HIGH',
+      risk_level: 'LOW',
+      requires_approval: 0,
+      assigned_agent: 'Product Discovery Agent',
+      acceptance_criteria: JSON.stringify(['Personas detalhadas', 'Jornada crítica do paciente definida']),
+      dedup_suffix: 'product-001'
+    },
+    {
+      title: 'Auditoria de Arquitetura e Isolamento Multi-tenant no FisioPlus',
+      description: 'Code & Architecture Auditor deve avaliar a resiliência do backend, pool de conexões PostgreSQL e isolamento estrito de dados entre clínicas.',
+      column: 'TODO',
+      category: 'ARCHITECTURE',
+      priority: 'HIGH',
+      risk_level: 'LOW',
+      requires_approval: 0,
+      assigned_agent: 'Code & Architecture Auditor',
+      acceptance_criteria: JSON.stringify(['Isolamento de tenant validado', 'Resiliência de conexões Prisma auditada']),
+      dedup_suffix: 'arch-001'
+    },
+    {
+      title: 'Auditoria de Usabilidade e Ergonomia Digital em Fichas Clínicas Touchscreen',
+      description: 'UX Recon Agent deve analisar a agilidade no preenchimento de anamnese e evolução diária por fisioterapeutas em tablets e smartphones.',
+      column: 'TODO',
+      category: 'UX',
+      priority: 'MEDIUM',
+      risk_level: 'LOW',
+      requires_approval: 0,
+      assigned_agent: 'UX Recon Agent',
+      acceptance_criteria: JSON.stringify(['Ergonomia mobile avaliada', 'Fluxo de preenchimento em menos de 2 minutos']),
+      dedup_suffix: 'ux-001'
+    },
+    {
+      title: 'Auditoria da Lei 13.787/2018 (Guarda de Prontuários por 20 Anos) e LGPD Art. 11',
+      description: 'Legal & Privacy Compliance Auditor deve verificar conformidade de guarda por 20 anos e trilhas de auditoria para dados sensíveis de saúde.',
+      column: 'TODO',
+      category: 'LEGAL',
+      priority: 'HIGH',
+      risk_level: 'LOW',
+      requires_approval: 0,
+      assigned_agent: 'Legal & Privacy Compliance Auditor',
+      acceptance_criteria: JSON.stringify(['Conformidade Lei 13.787 comprovada', 'Logs de auditoria LGPD Art. 11']),
+      dedup_suffix: 'legal-002'
+    },
+    {
+      title: 'Consolidação Executiva e Cálculo do Release Readiness Score (0-100%)',
+      description: 'Product Validation & Release Readiness Agent (Agente Principal) consolida todas as auditorias e emite o Veredito Oficial de Prontidão para Produção.',
+      column: 'TODO',
+      category: 'PRODUCT',
+      priority: 'CRITICAL',
+      risk_level: 'LOW',
+      requires_approval: 0,
+      assigned_agent: 'Product Validation & Release Readiness Agent',
+      acceptance_criteria: JSON.stringify(['Release Readiness Score calculado', 'Veredito e Matriz de Decisão emitidos']),
+      dedup_suffix: 'release-001'
+    }
+  ];
+
+  for (const proj of allProjects) {
+    for (const def of specializedTasksDefinitions) {
+      const dedupKey = `${proj.id}-${def.dedup_suffix}`;
+      const existingTask = db.prepare('SELECT id FROM tasks WHERE dedup_key = ?').get(dedupKey);
+      if (!existingTask) {
+        db.prepare(`
+          INSERT INTO tasks (id, project_id, title, description, column, category, priority, risk_level, requires_approval, assigned_agent, acceptance_criteria, dedup_key)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          crypto.randomUUID(),
+          proj.id,
+          def.title,
+          def.description,
+          def.column,
+          def.category,
+          def.priority,
+          def.risk_level,
+          def.requires_approval,
+          def.assigned_agent,
+          def.acceptance_criteria,
+          dedupKey
+        );
+      }
+    }
+  }
+
   console.log('[DB] Seeds inseridos com sucesso.');
 }
 
