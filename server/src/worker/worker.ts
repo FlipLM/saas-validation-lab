@@ -142,12 +142,20 @@ export class Worker {
 
   private async notifyTelegram(projectName: string, agentName: string, findingsCount: number) {
     try {
-      const telegramInteg = queryOne<{ config_masked: string; status: string }>(`
-        SELECT config_masked, status FROM integrations WHERE id = 'telegram'
+      const telegramInteg = queryOne<{ config_secure: string; status: string }>(`
+        SELECT config_secure, status FROM integrations WHERE id = 'telegram'
       `);
-      if (telegramInteg && telegramInteg.status === 'TESTED') {
-        const token = process.env.TELEGRAM_BOT_TOKEN;
-        const chatId = process.env.TELEGRAM_CHAT_ID;
+      if (telegramInteg && (telegramInteg.status === 'TESTED' || telegramInteg.status === 'CONFIGURED')) {
+        let conf: any = {};
+        try {
+          conf = JSON.parse(telegramInteg.config_secure || '{}');
+        } catch {
+          conf = {};
+        }
+
+        const token = conf.bot_token || process.env.TELEGRAM_BOT_TOKEN;
+        const chatId = conf.chat_id || process.env.TELEGRAM_CHAT_ID;
+
         if (token && chatId) {
           const adapter = new TelegramAdapter(token, chatId);
           await adapter.sendMessage(
@@ -155,12 +163,11 @@ export class Worker {
             `*Projeto*: ${projectName}\n` +
             `*Agente*: ${agentName}\n` +
             `*Achados Mapeados*: ${findingsCount}\n` +
-            `*Status*: Resultados persistidos no painel.`
+            `*Status*: Resultados persistidos no painel e disponíveis na aba Relatórios.`
           );
         }
       }
     } catch (err) {
-      // Notificação secundária não quebra o fluxo de execução principal
       console.warn('[WORKER] Falha no envio de notificação Telegram:', err);
     }
   }
