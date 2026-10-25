@@ -1,5 +1,6 @@
 import { IAgent, AgentContext, AgentOutput } from '../types.js';
 import { queryAll, queryOne } from '../../db/index.js';
+import { LLMService } from '../../services/llm.service.js';
 
 // 1. Product Discovery Agent
 export class ProductDiscoveryAgent implements IAgent {
@@ -53,6 +54,25 @@ export class CodeArchitectureAuditorAgent implements IAgent {
 
   async execute(ctx: AgentContext): Promise<AgentOutput> {
     const repo = ctx.repo_url || 'FlipLM/FisioPlus';
+
+    let aiRecommendation = '';
+    try {
+      const aiResult = await LLMService.generate(
+        `Como arquiteto de software sênior, revise a diretriz de isolamento multi-tenant (Prisma + PostgreSQL) para o SaaS de fisioterapia "${ctx.project_name}". Responda em 1 frase direta com a recomendação técnica.`,
+        {
+          specialty: 'coding',
+          taskId: ctx.task_id,
+          projectId: ctx.project_id,
+          taskTitle: ctx.task_title,
+        }
+      );
+      if (aiResult.content) {
+        aiRecommendation = `\n// Parecer Técnico (IA OpenRouter - ${aiResult.modelUsed}): ${aiResult.content}`;
+      }
+    } catch (err: any) {
+      console.warn('[CODE-AUDITOR] LLM indisponível no momento:', err.message);
+    }
+
     return {
       summary: `Auditoria de código e arquitetura do repositório ${repo} concluída. Stack moderna com pontos de atenção em isolamento relacional e resiliência.`,
       findings: [
@@ -66,7 +86,7 @@ export class CodeArchitectureAuditorAgent implements IAgent {
           evidence: {
             type: 'CODE_SNIPPET',
             source_url: ctx.repo_url || ctx.target_url,
-            raw_content: `// Verificação de isolamento relacional:\n// Repositório: ${repo}\n// Diretiva: WHERE tenant_id = currentSession.tenantId obrigatório em consultas de prontuários e pacientes.`,
+            raw_content: `// Verificação de isolamento relacional:\n// Repositório: ${repo}\n// Diretiva: WHERE tenant_id = currentSession.tenantId obrigatório em consultas de prontuários e pacientes.${aiRecommendation}`,
           },
         },
         {

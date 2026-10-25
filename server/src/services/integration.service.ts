@@ -2,6 +2,7 @@ import { queryAll, queryOne, execute } from '../db/index.js';
 import { Integration, IntegrationStatus } from '../types/index.js';
 import { PentAGIAdapter } from '../integrations/pentagi/pentagi-adapter.js';
 import { TelegramAdapter } from '../integrations/telegram/telegram-adapter.js';
+import { OpenRouterAdapter } from '../integrations/openrouter/openrouter-client.js';
 import crypto from 'node:crypto';
 
 export class IntegrationService {
@@ -44,6 +45,13 @@ export class IntegrationService {
           requirements: 'Bot Token criado via @BotFather e Chat ID válido.',
           external_cost: 'Gratuito via Telegram Bot API.',
         };
+      } else if (item.id === 'openrouter') {
+        metadata = {
+          purpose: 'Roteamento autônomo de LLMs gratuitas para agentes especialistas com escalação inteligente para o Antigravity.',
+          documentation_url: 'https://openrouter.ai/docs',
+          requirements: 'Chave de API OpenRouter configurada.',
+          external_cost: 'Modelos com sufixo :free (Gratuito).',
+        };
       }
 
       return {
@@ -85,6 +93,8 @@ export class IntegrationService {
     } else if (id === 'pentagi') {
       if (secureConfig.api_url) process.env.PENTAGI_API_URL = secureConfig.api_url;
       if (secureConfig.api_key) process.env.PENTAGI_API_KEY = secureConfig.api_key;
+    } else if (id === 'openrouter') {
+      if (secureConfig.api_key) process.env.OPENROUTER_API_KEY = secureConfig.api_key;
     }
 
     // Gera configuração mascarada para exibição segura na API e frontend
@@ -140,6 +150,15 @@ export class IntegrationService {
       const token = secureConfig.bot_token || process.env.TELEGRAM_BOT_TOKEN || '';
       const chatId = secureConfig.chat_id || process.env.TELEGRAM_CHAT_ID || '';
       const adapter = new TelegramAdapter(token, chatId);
+      const res = await adapter.testConnection();
+      testResult = {
+        status: res.status,
+        error: res.error,
+        responseTimeMs: res.responseTimeMs,
+      };
+    } else if (id === 'openrouter') {
+      const apiKey = secureConfig.api_key || process.env.OPENROUTER_API_KEY || '';
+      const adapter = new OpenRouterAdapter(apiKey);
       const res = await adapter.testConnection();
       testResult = {
         status: res.status,

@@ -25,6 +25,7 @@ export const Kanban: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [filterAntigravity, setFilterAntigravity] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
 
   // Modal State
@@ -178,6 +179,19 @@ export const Kanban: React.FC = () => {
             </select>
           </div>
 
+          {/* Antigravity Filter Toggle */}
+          <button
+            onClick={() => setFilterAntigravity(!filterAntigravity)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition ${
+              filterAntigravity
+                ? 'bg-purple-600 border-purple-500 text-white shadow-md shadow-purple-500/20'
+                : 'bg-slate-900 border-purple-500/30 text-purple-300 hover:border-purple-500/60'
+            }`}
+          >
+            <span>🤖</span>
+            <span>Apenas Antigravity ({tasks.filter(t => t.assigned_agent?.includes('Antigravity')).length})</span>
+          </button>
+
           <button
             onClick={() => setIsModalOpen(true)}
             className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-sm transition"
@@ -196,7 +210,11 @@ export const Kanban: React.FC = () => {
       ) : (
         <div className="flex-1 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 overflow-x-auto pb-4">
           {COLUMNS.map(col => {
-            const colTasks = tasks.filter(t => t.column === col.id);
+            const colTasks = tasks.filter(t => {
+              if (t.column !== col.id) return false;
+              if (filterAntigravity) return t.assigned_agent?.includes('Antigravity');
+              return true;
+            });
 
             return (
               <div 
@@ -263,6 +281,32 @@ export const Kanban: React.FC = () => {
                               </div>
                             )}
                           </div>
+
+                          {/* Destaque para Tarefas Escaladas ao Antigravity */}
+                          {task.assigned_agent?.includes('Antigravity') && (
+                            <div className="p-2 rounded bg-purple-950/70 border border-purple-500/40 text-[10px] space-y-1.5 shadow-sm">
+                              <div className="flex items-center justify-between text-purple-300 font-bold">
+                                <span className="flex items-center gap-1">
+                                  <span>🤖</span>
+                                  <span>Escalada para o Antigravity</span>
+                                </span>
+                              </div>
+                              <p className="text-purple-200/80 text-[10px] leading-tight">
+                                Tarefa com alta complexidade ou cota de tokens do OpenRouter excedida.
+                              </p>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const text = `Antigravity, execute a tarefa #${task.id}: "${task.title}".\nContexto: ${task.description || ''}`;
+                                  navigator.clipboard.writeText(text);
+                                  alert('Instrução copiada! Cole no chat do Antigravity no seu computador para eu realizar a alteração de código.');
+                                }}
+                                className="w-full py-1 px-2 bg-purple-600 hover:bg-purple-500 text-white rounded text-[10px] font-semibold transition flex items-center justify-center gap-1 shadow-sm"
+                              >
+                                <span>📋 Copiar Instrução para Antigravity</span>
+                              </button>
+                            </div>
+                          )}
 
                           {/* Quick Column Shift Selector */}
                           <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[10px] text-slate-400">

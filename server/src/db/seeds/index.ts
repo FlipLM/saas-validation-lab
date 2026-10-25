@@ -35,6 +35,12 @@ export function runSeeds(): void {
       status: 'NOT_CONFIGURED',
       config_masked: JSON.stringify({ bot_token: 'NOT_SET', chat_id: 'NOT_SET', enabled: false }),
     },
+    {
+      id: 'openrouter',
+      name: 'OpenRouter Multi-LLM Platform',
+      status: 'NOT_CONFIGURED',
+      config_masked: JSON.stringify({ api_key: 'NOT_SET', default_model: 'openrouter/free', enabled: false }),
+    },
   ];
 
   for (const integ of defaultIntegrations) {

@@ -27,6 +27,8 @@ export const Integrations: React.FC = () => {
   const [pentagiKey, setPentagiKey] = useState('');
   const [telegramToken, setTelegramToken] = useState('');
   const [telegramChatId, setTelegramChatId] = useState('');
+  const [openrouterKey, setOpenrouterKey] = useState('');
+  const [openrouterModel, setOpenrouterModel] = useState('openrouter/free');
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -75,6 +77,9 @@ export const Integrations: React.FC = () => {
     } else if (integ.id === 'telegram') {
       setTelegramToken(integ.config.bot_token || '');
       setTelegramChatId(integ.config.chat_id || '');
+    } else if (integ.id === 'openrouter') {
+      setOpenrouterKey(integ.config.api_key || '');
+      setOpenrouterModel(integ.config.default_model || 'openrouter/free');
     }
   };
 
@@ -89,6 +94,8 @@ export const Integrations: React.FC = () => {
         payload = { api_url: pentagiUrl, api_key: pentagiKey, enabled: true };
       } else if (configuringItem.id === 'telegram') {
         payload = { bot_token: telegramToken, chat_id: telegramChatId, enabled: true };
+      } else if (configuringItem.id === 'openrouter') {
+        payload = { api_key: openrouterKey, default_model: openrouterModel, enabled: true };
       }
 
       await api.updateIntegrationConfig(configuringItem.id, payload);
@@ -297,7 +304,7 @@ export const Integrations: React.FC = () => {
                     />
                   </div>
                 </>
-              ) : (
+              ) : configuringItem.id === 'telegram' ? (
                 <>
                   <div>
                     <label className="block text-slate-300 font-semibold mb-1">Telegram Bot Token *</label>
@@ -321,6 +328,34 @@ export const Integrations: React.FC = () => {
                       placeholder="-100123456789 ou 987654321"
                       className="w-full px-3 py-2 rounded-lg bg-surface-950 border border-slate-700 text-white focus:outline-none focus:border-brand-500"
                     />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1">OpenRouter API Key *</label>
+                    <input
+                      type="password"
+                      required
+                      value={openrouterKey}
+                      onChange={e => setOpenrouterKey(e.target.value)}
+                      placeholder="sk-or-v1-..."
+                      className="w-full px-3 py-2 rounded-lg bg-surface-950 border border-slate-700 text-white focus:outline-none focus:border-brand-500 font-mono text-xs"
+                    />
+                    <span className="text-[10px] text-slate-400 mt-1 block">Obtenha gratuitamente em openrouter.ai/keys.</span>
+                  </div>
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1">Roteador Padrão</label>
+                    <select
+                      value={openrouterModel}
+                      onChange={e => setOpenrouterModel(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg bg-surface-950 border border-slate-700 text-white focus:outline-none focus:border-brand-500 text-xs"
+                    >
+                      <option value="openrouter/free">openrouter/free (Roteamento Dinâmico Inteligente)</option>
+                      <option value="google/gemma-4-31b-it:free">google/gemma-4-31b-it:free</option>
+                      <option value="cohere/north-mini-code:free">cohere/north-mini-code:free</option>
+                    </select>
+                    <span className="text-[10px] text-emerald-400 mt-1 block">✓ Fallback automático ativo. Se a cota esgotar, a tarefa é escalada para o Antigravity.</span>
                   </div>
                 </>
               )}
