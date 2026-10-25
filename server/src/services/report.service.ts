@@ -1,5 +1,6 @@
 import { queryAll, queryOne, execute } from '../db/index.js';
 import { Report, Project, Finding, Task } from '../types/index.js';
+import { TelegramBotService } from '../integrations/telegram/telegram-bot.service.js';
 import crypto from 'node:crypto';
 
 export class ReportService {
@@ -194,6 +195,15 @@ ${f.description}
       JSON.stringify(findingsCount),
       markdownContent,
     ]);
+
+    // Dispara notificação com botões interativos no Telegram
+    try {
+      const findingsSummary = `• Total de Achados: ${findings.length}\n• Críticos: ${findingsCount.critical} | Altos: ${findingsCount.high} | Médios: ${findingsCount.medium}\n• Vulnerabilidades Confirmadas: ${confirmedVulnerabilities.length}`;
+      TelegramBotService.sendReportPrompt(reportTitle, readinessScore, releaseVerdict, findingsSummary)
+        .catch(err => console.warn('[REPORT-SERVICE] Erro ao enviar prompt interativo Telegram:', err));
+    } catch (err) {
+      console.warn('[REPORT-SERVICE] Falha ao acionar prompt Telegram:', err);
+    }
 
     return this.getReportById(reportId);
   }

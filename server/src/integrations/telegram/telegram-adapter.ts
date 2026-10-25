@@ -62,19 +62,34 @@ export class TelegramAdapter {
   }
 
   async sendMessage(text: string): Promise<{ success: boolean; messageId?: number; error?: string }> {
+    return this.sendMessageWithButtons(text);
+  }
+
+  async sendMessageWithButtons(
+    text: string, 
+    inlineKeyboard?: Array<Array<{ text: string; callback_data?: string; url?: string }>>
+  ): Promise<{ success: boolean; messageId?: number; error?: string }> {
     if (!this.botToken || !this.chatId) {
       return { success: false, error: 'Telegram não configurado para envio de mensagens' };
     }
 
     try {
+      const payload: any = {
+        chat_id: this.chatId,
+        text: text,
+        parse_mode: 'Markdown',
+      };
+
+      if (inlineKeyboard && inlineKeyboard.length > 0) {
+        payload.reply_markup = {
+          inline_keyboard: inlineKeyboard,
+        };
+      }
+
       const response = await fetch(`https://api.telegram.org/bot${this.botToken}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: this.chatId,
-          text: text,
-          parse_mode: 'Markdown',
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = (await response.json().catch(() => ({}))) as any;
@@ -85,6 +100,54 @@ export class TelegramAdapter {
       }
     } catch (err: any) {
       return { success: false, error: err.message };
+    }
+  }
+
+  async answerCallbackQuery(callbackQueryId: string, text?: string): Promise<{ success: boolean; error?: string }> {
+    if (!this.botToken) {
+      return { success: false, error: 'Bot token não configurado' };
+    }
+
+    try {
+      const response = await fetch(`https://api.telegram.org/bot${this.botToken}/answerCallbackQuery`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          callback_query_id: callbackQueryId,
+          text: text || 'Ação registrada!',
+          show_alert: false,
+        }),
+      });
+
+      const data = (await response.json().catch(() => ({}))) as any;
+      return { success: response.ok && data.ok, error: data.description };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  }
+
+  async getUpdates(offset?: number, timeout = 10): Promise<{ ok: boolean; result: any[]; description?: string }> {
+    if (!this.botToken) {
+      return { ok: false, result: [], description: 'Bot token não configurado' };
+    }
+
+    try {
+      const params = new URLSearchParams();
+      if (offset) params.set('offset', String(offset));
+      if (timeout) params.set('timeout', String(timeout));
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), (timeout + 5) * 1000);
+
+      const response = await fetch(`https://api.telegram.org/bot${this.botToken}/getUpdates?${params.toString()}`, {
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      const data = (await response.json().catch(() => ({ ok: false, result: [] }))) as any;
+      return data;
+    } catch (err: any) {
+      return { ok: false, result: [], description: err.message };
     }
   }
 }

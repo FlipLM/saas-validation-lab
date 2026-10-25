@@ -109,4 +109,12 @@ export const api = {
 
   // Diagnósticos
   getDiagnostics: () => request<any>('/diagnostics/health'),
+
+  // Controle Autônomo do Orquestrador
+  getOrchestratorStatus: (projectId?: string) => {
+    const params = projectId ? `?projectId=${projectId}` : '';
+    return request<any>(`/orchestrator/status${params}`);
+  },
+  executeOrchestratorDecision: (action: string, projectId?: string) =>
+    request<any>('/orchestrator/decision', { method: 'POST', body: JSON.stringify({ action, projectId }) }),
 };

@@ -32,6 +32,8 @@ import { reportsRouter } from './routes/reports.routes.js';
 import { executionsRouter } from './routes/executions.routes.js';
 import { approvalsRouter } from './routes/approvals.routes.js';
 import { diagnosticsRouter } from './routes/diagnostics.routes.js';
+import { orchestratorRouter } from './routes/orchestrator.routes.js';
+import { TelegramBotService } from './integrations/telegram/telegram-bot.service.js';
 
 // Assegura migrações e seeds na inicialização do servidor
 try {
@@ -76,6 +78,7 @@ app.use('/api/reports', reportsRouter);
 app.use('/api/executions', executionsRouter);
 app.use('/api/approvals', approvalsRouter);
 app.use('/api/diagnostics', diagnosticsRouter);
+app.use('/api/orchestrator', orchestratorRouter);
 
 // Rota Raiz Informativa
 app.get('/api', (_req: Request, res: Response) => {
@@ -144,6 +147,9 @@ if (process.env.ENABLE_EMBEDDED_WORKER !== 'false') {
       }
     }, parseInt(process.env.WORKER_POLL_INTERVAL_MS || '3000', 10));
   });
+
+  // Inicializa o serviço interativo de bot e polling do Telegram
+  TelegramBotService.start();
 }
 
 app.listen(Number(port), host, () => {

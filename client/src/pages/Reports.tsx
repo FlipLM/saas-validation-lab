@@ -7,7 +7,12 @@ import {
   Plus, 
   Layers, 
   FileCode, 
-  Activity
+  Activity,
+  Zap,
+  CheckCircle,
+  RefreshCw,
+  Wrench,
+  Play
 } from 'lucide-react';
 
 export const Reports: React.FC = () => {
@@ -17,6 +22,9 @@ export const Reports: React.FC = () => {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [orchestratorStatus, setOrchestratorStatus] = useState<any>(null);
+  const [executingAction, setExecutingAction] = useState<string | null>(null);
+  const [actionFeedback, setActionFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   useEffect(() => {
     loadProjects();
@@ -46,10 +54,35 @@ export const Reports: React.FC = () => {
       if (data.length > 0 && !selectedReport) {
         setSelectedReport(data[0]);
       }
+      await loadOrchestratorStatus();
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadOrchestratorStatus = async () => {
+    try {
+      const status = await api.getOrchestratorStatus(selectedProjectId || undefined);
+      setOrchestratorStatus(status);
+    } catch (err) {
+      console.warn('Erro ao carregar status do orquestrador:', err);
+    }
+  };
+
+  const handleOrchestratorDecision = async (action: string) => {
+    try {
+      setExecutingAction(action);
+      setActionFeedback(null);
+      const result = await api.executeOrchestratorDecision(action, selectedProjectId || undefined);
+      setActionFeedback({ message: result.message, type: 'success' });
+      await loadOrchestratorStatus();
+      await loadReports();
+    } catch (err: any) {
+      setActionFeedback({ message: err.message || 'Erro ao executar ação do orquestrador', type: 'error' });
+    } finally {
+      setExecutingAction(null);
     }
   };
 
@@ -112,6 +145,84 @@ export const Reports: React.FC = () => {
             <span>{generating ? 'Consolidando...' : 'Gerar Novo Relatório'}</span>
           </button>
         </div>
+      </div>
+
+      {/* Painel Interativo de Decisão do Orquestrador */}
+      <div className="glass-panel p-4 rounded-xl border border-brand-500/30 bg-gradient-to-r from-brand-950/40 via-surface-900 to-slate-900/80 shadow-md space-y-3 shrink-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-brand-500/20 border border-brand-500/40 flex items-center justify-center text-brand-400">
+              <Play className="w-4 h-4 fill-brand-400" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <span>🧭 Próximo Passo do Orquestrador (Controle Autônomo)</span>
+                {orchestratorStatus && (
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                    Fila: {orchestratorStatus.counts.todo} | Revisão: {orchestratorStatus.counts.in_review} | Concluídas: {orchestratorStatus.counts.done}
+                  </span>
+                )}
+              </h3>
+              <p className="text-xs text-slate-400">
+                {orchestratorStatus?.recommendation || 'Selecione abaixo como você deseja que o agente orquestrador continue trabalhando sozinho:'}
+              </p>
+            </div>
+          </div>
+
+          {/* Botões de Ação */}
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => handleOrchestratorDecision('action:approve_stress')}
+              disabled={executingAction !== null}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-sm transition disabled:opacity-50 cursor-pointer"
+              title="Aprova o teste de estresse e carga no Backlog e move para execução imediata"
+            >
+              <Zap className="w-3.5 h-3.5" />
+              <span>Aprovar Teste de Carga</span>
+            </button>
+
+            <button
+              onClick={() => handleOrchestratorDecision('action:generate_fixes')}
+              disabled={executingAction !== null}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-sm transition disabled:opacity-50 cursor-pointer"
+              title="Cria automaticamente 4 tarefas de remediação em TODO para os agentes corrigirem as falhas"
+            >
+              <Wrench className="w-3.5 h-3.5" />
+              <span>Gerar Correções (Remediação)</span>
+            </button>
+
+            <button
+              onClick={() => handleOrchestratorDecision('action:promote_done')}
+              disabled={executingAction !== null}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-sm transition disabled:opacity-50 cursor-pointer"
+              title="Homologa todas as tarefas em revisão e move para CONCLUÍDO (DONE)"
+            >
+              <CheckCircle className="w-3.5 h-3.5" />
+              <span>Aprovar Tudo (DONE)</span>
+            </button>
+
+            <button
+              onClick={() => handleOrchestratorDecision('action:rerun_audit')}
+              disabled={executingAction !== null}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition disabled:opacity-50 cursor-pointer"
+              title="Reinicia todas as tarefas para TODO para executar uma nova rodada autônoma de validação"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-slate-400 ${executingAction === 'action:rerun_audit' ? 'animate-spin' : ''}`} />
+              <span>Re-executar Ciclo</span>
+            </button>
+          </div>
+        </div>
+
+        {actionFeedback && (
+          <div className={`p-2.5 rounded-lg text-xs flex items-center justify-between ${
+            actionFeedback.type === 'success' 
+              ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300' 
+              : 'bg-rose-500/10 border border-rose-500/30 text-rose-300'
+          }`}>
+            <span>{actionFeedback.message}</span>
+            <button onClick={() => setActionFeedback(null)} className="text-slate-400 hover:text-white ml-2 text-[10px]">✕</button>
+          </div>
+        )}
       </div>
 
       {loading ? (
