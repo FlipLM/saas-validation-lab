@@ -167,7 +167,7 @@ export class OrchestratorControlService {
 
             execute(`
               UPDATE approvals 
-              SET status = 'APPROVED', approved_at = CURRENT_TIMESTAMP, approved_by = 'telegram_user'
+              SET status = 'APPROVED', decided_at = CURRENT_TIMESTAMP, decided_by = 'telegram_user'
               WHERE task_id = ? AND status = 'PENDING'
             `, [targetTask.id]);
 
@@ -289,7 +289,7 @@ export class OrchestratorControlService {
 
         execute(`
           UPDATE approvals 
-          SET status = 'APPROVED', approved_at = CURRENT_TIMESTAMP, approved_by = 'orchestrator_decision'
+          SET status = 'APPROVED', decided_at = CURRENT_TIMESTAMP, decided_by = 'orchestrator_decision'
           WHERE status = 'PENDING'
         `);
 
@@ -339,7 +339,7 @@ export class OrchestratorControlService {
 
         execute(`
           UPDATE approvals 
-          SET status = 'APPROVED', approved_at = CURRENT_TIMESTAMP, approved_by = 'orchestrator_decision'
+          SET status = 'APPROVED', decided_at = CURRENT_TIMESTAMP, decided_by = 'orchestrator_decision'
           WHERE status = 'PENDING'
         `);
 
